@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07090f">
+<title>AceDeals | Mon forfait 10 poses</title>
+<style>
+  :root{
+    --bg:#07090f; --card:#0d1220; --line:#1a2440;
+    --blue:#2ea8ff; --blue-deep:#0198fd; --silver:#e4ebf4; --muted:#8a97b0; --ball:#b4d114;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--silver);min-height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    display:flex;justify-content:center;
+    background:
+      radial-gradient(900px 500px at 50% -10%, rgba(1,152,253,.28), transparent 60%),
+      radial-gradient(600px 400px at 100% 100%, rgba(1,152,253,.12), transparent 60%),
+      var(--bg);
+    padding:max(24px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));
+  }
+  main{width:100%;max-width:440px}
+
+  .brand{text-align:center;margin:8px 0 28px}
+  .brand .word{font-size:44px;font-weight:900;font-style:italic;letter-spacing:.02em;line-height:1;transform:skewX(-4deg);display:inline-block}
+  .brand .ace{color:var(--blue);text-shadow:0 0 24px rgba(46,168,255,.55)}
+  .brand .deals{color:var(--silver)}
+  .brand .tag{margin-top:10px;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+  .brand .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ball);margin:0 8px 1px;box-shadow:0 0 10px rgba(180,209,20,.6)}
+
+  .card{
+    background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01)),var(--card);
+    border:1px solid var(--line);border-radius:22px;padding:28px 22px 24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .hello{font-size:15px;color:var(--muted);text-align:center}
+  .hello b{color:var(--silver);font-weight:700}
+  .big{display:flex;align-items:baseline;justify-content:center;gap:10px;margin:10px 0 4px}
+  .big .n{font-size:96px;font-weight:900;line-height:1;color:var(--blue);text-shadow:0 0 36px rgba(46,168,255,.5);font-variant-numeric:tabular-nums}
+  .big .of{font-size:22px;color:var(--muted);font-weight:600}
+  .label{text-align:center;font-size:17px;font-weight:600;letter-spacing:.01em}
+
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:28px 4px 6px}
+  .p{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;position:relative}
+  .p.left{background:radial-gradient(circle at 30% 28%,#5cc0ff,var(--blue-deep));color:#04101c;box-shadow:0 0 18px rgba(1,152,253,.55)}
+  .p.used{background:transparent;border:2px solid #25314f;color:#3b4a6e}
+  .p.used::after{content:"";position:absolute;width:42%;height:2px;background:#33415f;transform:rotate(-35deg);border-radius:2px}
+  .p.next{animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 14px rgba(1,152,253,.5)}50%{box-shadow:0 0 28px rgba(46,168,255,.95)}}
+  @media (prefers-reduced-motion:reduce){.p.next{animation:none}}
+
+  .legend{display:flex;justify-content:center;gap:18px;font-size:12px;color:var(--muted);margin-top:14px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+  .legend .l{background:var(--blue-deep);box-shadow:0 0 8px rgba(1,152,253,.7)}
+  .legend .u{border:2px solid #25314f}
+
+  .msg{margin-top:22px;padding:14px 16px;border-radius:14px;background:rgba(46,168,255,.08);border:1px solid rgba(46,168,255,.25);font-size:14px;line-height:1.5;text-align:center}
+  .msg.done{background:rgba(180,209,20,.08);border-color:rgba(180,209,20,.35)}
+  .msg b{color:#fff}
+
+  .state{padding:34px 10px;text-align:center;color:var(--muted);line-height:1.6}
+  .state h2{color:var(--silver);font-size:20px;margin-bottom:8px}
+  .spin{width:34px;height:34px;border-radius:50%;border:3px solid #1d2a4a;border-top-color:var(--blue);margin:0 auto 14px;animation:s 1s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+
+  footer{text-align:center;margin-top:22px;font-size:12.5px;color:var(--muted);line-height:1.7}
+  footer b{color:var(--silver)}
+
+  .demo{margin-top:18px;text-align:center;font-size:12px;color:var(--muted)}
+  .demo button{background:transparent;color:var(--silver);border:1px solid var(--line);border-radius:999px;padding:6px 12px;margin:4px 3px 0;font-size:12px;cursor:pointer}
+  .demo button:hover{border-color:var(--blue)}
+  .demo .badge{display:inline-block;background:var(--ball);color:#10140a;font-weight:800;border-radius:6px;padding:2px 8px;margin-bottom:6px;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<main>
+  <header class="brand">
+    <div class="word"><span class="ace">ACE</span><span class="deals">DEALS</span></div>
+    <div class="tag">Cordage<span class="dot"></span>Coaching</div>
+  </header>
+
+  <section class="card" id="card" aria-live="polite">
+    <div class="state"><div class="spin"></div>Chargement de ton forfait…</div>
+  </section>
+
+  <div class="demo" id="demo" hidden></div>
+
+  <footer>
+    Forfait <b>10 poses</b> · 80 €<br>
+    Une pose = une raquette cordée, cordage inclus<br>
+    Une question ? Écris-moi en message privé sur <b>@acedeals.pro</b>
+  </footer>
+</main>
+
+<script>
+/* ============ RÉGLAGES ============
+   1) Colle ici le lien CSV de ton Google Sheets publié (Fichier > Partager > Publier sur le web > CSV).
+   2) Tant que ce lien est vide, la page tourne en mode démo avec de faux clients.
+*/
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcyowOaj4-lj7vB1EtdHB5UnRBRpIoLzJZwteqVlKmntODPGd1IZVkls8GY8TN1BFbLWKGBD6_0cKC/pub?gid=1414736501&single=true&output=csv";
+const TOTAL_PAR_DEFAUT = 10;
+/* =============================== */
+
+const card = document.getElementById("card");
+const demoBox = document.getElementById("demo");
+const params = new URLSearchParams(location.search);
+const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").trim().toLowerCase();
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const DEMO = [
+  {code:"DEMO0", prenom:"Camille", utilisees:0, total:10},
+  {code:"DEMO3", prenom:"Thomas",  utilisees:3, total:10},
+  {code:"DEMO9", prenom:"Julie",   utilisees:9, total:10},
+  {code:"DEMO10",prenom:"Maxime",  utilisees:10,total:10},
+];
+
+function parseCSV(text){
+  const rows=[]; let row=[], cell="", q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=c;
+    } else if(c==='"') q=true;
+    else if(c===","||c===";"){ row.push(cell); cell=""; }
+    else if(c==="\n"||c==="\r"){ if(c==="\r"&&text[i+1]==="\n")i++; row.push(cell); rows.push(row); row=[]; cell=""; }
+    else cell+=c;
+  }
+  if(cell!==""||row.length){ row.push(cell); rows.push(row); }
+  return rows.filter(r=>r.some(x=>x.trim()!==""));
+}
+
+function rowsToClients(rows){
+  if(!rows.length) return [];
+  const head = rows[0].map(norm);
+  const idx = names => head.findIndex(h => names.some(n => h.includes(n)));
+  const iCode = idx(["code"]), iName = idx(["prenom"]), iUsed = idx(["utilis"]), iTot = idx(["achet","total"]);
+  return rows.slice(1).map(r => ({
+    code: (r[iCode]||"").trim().toUpperCase(),
+    prenom: (r[iName]||"").trim(),
+    utilisees: parseInt(r[iUsed],10) || 0,
+    total: iTot>=0 && parseInt(r[iTot],10) ? parseInt(r[iTot],10) : TOTAL_PAR_DEFAUT
+  })).filter(c => c.code);
+}
+
+function render(c){
+  const total = Math.max(1, c.total);
+  const used = Math.min(Math.max(0,c.utilisees), total);
+  const left = total - used;
+  let dots = "";
+  for(let i=1;i<=total;i++){
+    const isUsed = i<=used;
+    const isNext = i===used+1;
+    dots += `<div class="p ${isUsed?"used":"left"}${isNext?" next":""}" title="Pose ${i}">${isUsed?"":i}</div>`;
+  }
+  let msg = "";
+  if(left===0) msg = `<div class="msg done"><b>Ton forfait est terminé.</b><br>Merci pour ta confiance ! Écris-moi en message privé pour en reprendre un.</div>`;
+  else if(left<=2) msg = `<div class="msg done">Plus que <b>${left} pose${left>1?"s":""}</b> : pense à reprendre un forfait pour ne pas être en rupture.</div>`;
+  else msg = `<div class="msg">Montre simplement ta raquette : je valide ta pose et ton compteur se met à jour tout seul.</div>`;
+
+  card.innerHTML = `
+    <div class="hello">Salut <b>${esc(c.prenom||"champion")}</b> 👋</div>
+    <div class="big"><span class="n">${left}</span><span class="of">/ ${total}</span></div>
+    <div class="label">${left>1?"poses restantes":"pose restante"}</div>
+    <div class="grid">${dots}</div>
+    <div class="legend"><span><i class="l"></i>Disponible</span><span><i class="u"></i>Utilisée</span></div>
+    ${msg}`;
+}
+
+function notFound(){
+  card.innerHTML = `<div class="state"><h2>Forfait introuvable</h2>Ce code ne correspond à aucun forfait.<br>Vérifie l'étiquette de ta raquette ou écris-moi en message privé.</div>`;
+}
+
+function setupDemo(){
+  demoBox.hidden = false;
+  demoBox.innerHTML = `<span class="badge">MODE DÉMO</span><br>Essaie un autre client :<br>` +
+    DEMO.map(d=>`<button data-c="${d.code}">${d.utilisees} utilisée${d.utilisees>1?"s":""}</button>`).join("");
+  demoBox.querySelectorAll("button").forEach(b => b.onclick = () => render(DEMO.find(d=>d.code===b.dataset.c)));
+}
+
+async function main(){
+  const code = (params.get("c")||"").trim().toUpperCase();
+  if(!SHEET_CSV_URL){
+    setupDemo();
+    render(DEMO.find(d=>d.code===code) || DEMO[1]);
+    return;
+  }
+  if(!code){ notFound(); return; }
+  try{
+    const res = await fetch(SHEET_CSV_URL + (SHEET_CSV_URL.includes("?")?"&":"?") + "t=" + Date.now(), {cache:"no-store"});
+    if(!res.ok) throw new Error("http "+res.status);
+    const clients = rowsToClients(parseCSV(await res.text()));
+    const c = clients.find(x => x.code === code);
+    c ? render(c) : notFound();
+  }catch(e){
+    card.innerHTML = `<div class="state"><h2>Oups</h2>Impossible de charger ton forfait pour le moment.<br>Réessaie dans un instant.</div>`;
+  }
+}
+main();
+</script>
+</body>
+</html>
