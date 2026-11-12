@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>AceDeals | Générateur d'étiquettes</title>
+<style>
+  :root{--bg:#07090f;--card:#0d1220;--line:#1a2440;--blue:#2ea8ff;--blue-deep:#0198fd;--silver:#e4ebf4;--muted:#8a97b0;--ball:#b4d114}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;background:
+    radial-gradient(900px 500px at 50% -10%,rgba(1,152,253,.25),transparent 60%),var(--bg);color:var(--silver);min-height:100vh;padding:24px 16px 48px;display:flex;justify-content:center}
+  main{width:100%;max-width:720px}
+  h1{font-size:26px;font-weight:900;font-style:italic;margin-bottom:4px}
+  h1 span{color:var(--blue)}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:22px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}
+  .panel h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+  label:first-of-type{margin-top:0}
+  input[type=text],input[type=number]{width:100%;background:#0a0f1c;border:1px solid var(--line);color:var(--silver);border-radius:10px;padding:11px 12px;font-size:16px}
+  input:focus{outline:2px solid var(--blue-deep);border-color:transparent}
+  .row{display:flex;gap:10px;align-items:flex-end}
+  .row>div{flex:1}
+  button{background:var(--blue-deep);color:#04101c;border:0;border-radius:10px;padding:11px 14px;font-size:15px;font-weight:700;cursor:pointer}
+  button.ghost{background:transparent;color:var(--silver);border:1px solid var(--line);font-weight:600}
+  button.ghost:hover{border-color:var(--blue)}
+  .warn{margin-top:10px;font-size:13px;color:#ffd166;display:none}
+  .ok{margin-top:10px;font-size:13px;color:var(--ball)}
+  .preview{background:#fff;border-radius:6px;padding:0;display:flex;justify-content:center;box-shadow:0 10px 40px rgba(0,0,0,.5);overflow:hidden}
+  .preview svg{display:block;width:100%;height:auto;max-width:560px}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .link{margin-top:14px;font-size:12.5px;color:var(--muted);word-break:break-all}
+  .link a{color:var(--blue)}
+  .sheet{margin-top:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:#0a0f1c;border:1px dashed var(--line);border-radius:10px;padding:10px 12px;color:var(--silver);word-break:break-all}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  #printArea{display:none}
+  @media print{
+    body{background:#fff;padding:0;display:block;min-height:0}
+    body>main{display:none}
+    #printArea{display:block}
+    #printArea svg{display:block;page-break-after:always;break-after:page}
+    #printArea svg:last-child{page-break-after:auto;break-after:auto}
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1><span>ACE</span>DEALS · Étiquettes</h1>
+  <p class="sub">Tape le code et le prénom du client : le QR code et l'étiquette sont prêts à imprimer.</p>
+
+  <section class="panel">
+    <h2>1 · Le client</h2>
+    <div class="row">
+      <div>
+        <label for="code">Code du client</label>
+        <input type="text" id="code" placeholder="AD-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      </div>
+      <button class="ghost" id="rnd" type="button">Code au hasard</button>
+    </div>
+    <label for="prenom">Prénom</label>
+    <input type="text" id="prenom" placeholder="Thomas" autocomplete="off">
+    <div class="ok" id="dup" style="display:none"></div>
+    <div class="warn" id="codeWarn"></div>
+  </section>
+
+  <section class="panel">
+    <h2>2 · Taille de l'étiquette</h2>
+    <div class="presets" id="presets"></div>
+    <div class="row">
+      <div><label for="w">Largeur (mm)</label><input type="number" id="w" min="15" max="120" step="1" value="50"></div>
+      <div><label for="h">Hauteur (mm)</label><input type="number" id="h" min="10" max="100" step="1" value="25"></div>
+    </div>
+    <div class="warn" id="sizeWarn"></div>
+  </section>
+
+  <section class="panel">
+    <h2>3 · Étiquette</h2>
+    <div class="preview" id="preview"></div>
+    <div class="link" id="link"></div>
+    <div class="actions">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;color:var(--muted)">Copies</span><input type="number" id="copies" min="1" max="20" value="1" style="width:70px"></div>
+      <button id="print" type="button">Imprimer</button>
+      <button class="ghost" id="png" type="button">Télécharger en image (PNG)</button>
+    </div>
+    <p class="hint">Si ton imprimante a son propre logiciel, télécharge l'image PNG et importe-la dedans. Avec « Imprimer », choisis ton imprimante d'étiquettes et laisse la mise à l'échelle sur 100 %.</p>
+  </section>
+
+  <section class="panel">
+    <h2>4 · Ligne à coller dans ton Sheets</h2>
+    <div class="sheet" id="sheetRow"></div>
+    <div class="actions"><button class="ghost" id="copyRow" type="button">Copier la ligne</button></div>
+    <p class="hint">Clique sur la première case vide de la colonne « Code » dans ton Sheets, puis colle (Ctrl+V). Les 4 premières colonnes se remplissent d'un coup.</p>
+  </section>
+</main>
+<div id="printArea"></div>
+
+<script>
+/* ============ RÉGLAGES ============ */
+const BASE_URL = "https://acedealspro-cmd.github.io/forfait/";
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcyowOaj4-lj7vB1EtdHB5UnRBRpIoLzJZwteqVlKmntODPGd1IZVkls8GY8TN1BFbLWKGBD6_0cKC/pub?gid=1414736501&single=true&output=csv";
+const NB_POSES = 10;
+/* =============================== */
+
+/* ---------- Générateur de QR code (octets, correction d'erreur M, versions 1 à 10) ---------- */
+function makeQR(text, forceMask){
+  const bytes = Array.from(new TextEncoder().encode(text));
+  const ECC=[10,16,26,18,24,16,18,22,22,26], BLK=[1,1,1,2,2,4,4,4,5,5];
+  const raw = v => { let r=(16*v+128)*v+64; if(v>=2){const n=Math.floor(v/7)+2; r-=(25*n-10)*n-55; if(v>=7) r-=36;} return r; };
+  let ver=1, dataCap;
+  for(;;ver++){
+    if(ver>10) throw new Error("Lien trop long pour le QR code");
+    dataCap = Math.floor(raw(ver)/8) - ECC[ver-1]*BLK[ver-1];
+    if(4 + (ver<=9?8:16) + bytes.length*8 <= dataCap*8) break;
+  }
+  const bits=[]; const push=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>>i)&1);};
+  push(4,4); push(bytes.length, ver<=9?8:16); bytes.forEach(b=>push(b,8));
+  push(0, Math.min(4, dataCap*8-bits.length));
+  while(bits.length%8) bits.push(0);
+  for(let pad=0xEC; bits.length<dataCap*8; pad^=0xEC^0x11) push(pad,8);
+  const data=[]; for(let i=0;i<bits.length;i+=8){let b=0;for(let j=0;j<8;j++)b=(b<<1)|bits[i+j];data.push(b);}
+
+  const mul=(x,y)=>{let z=0;for(let i=7;i>=0;i--){z=(z<<1)^((z>>>7)*0x11D);z^=((y>>>i)&1)*x;}return z;};
+  const eccLen=ECC[ver-1], nb=BLK[ver-1];
+  const div=(()=>{const r=new Array(eccLen).fill(0);r[eccLen-1]=1;let root=1;
+    for(let i=0;i<eccLen;i++){for(let j=0;j<eccLen;j++){r[j]=mul(r[j],root);if(j+1<eccLen)r[j]^=r[j+1];}root=mul(root,2);}return r;})();
+  const rem=d=>{const r=new Array(eccLen).fill(0);for(const b of d){const f=b^r.shift();r.push(0);div.forEach((c,i)=>{r[i]^=mul(c,f);});}return r;};
+  const rawCw=Math.floor(raw(ver)/8), nShort=nb-rawCw%nb, shortLen=Math.floor(rawCw/nb);
+  const blocks=[];
+  for(let i=0,k=0;i<nb;i++){const dat=data.slice(k,k+shortLen-eccLen+(i<nShort?0:1));k+=dat.length;const e=rem(dat);if(i<nShort)dat.push(0);blocks.push(dat.concat(e));}
+  const all=[];
+  for(let i=0;i<blocks[0].length;i++) blocks.forEach((b,j)=>{ if(i!==shortLen-eccLen||j>=nShort) all.push(b[i]); });
+
+  const size=ver*4+17;
+  const m=Array.from({length:size},()=>new Array(size).fill(false));
+  const fn=Array.from({length:size},()=>new Array(size).fill(false));
+  const setF=(x,y,d)=>{m[y][x]=d;fn[y][x]=true;};
+  for(let i=0;i<size;i++){setF(6,i,i%2===0);setF(i,6,i%2===0);}
+  const finder=(cx,cy)=>{for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const d=Math.max(Math.abs(dx),Math.abs(dy)),x=cx+dx,y=cy+dy;if(x>=0&&x<size&&y>=0&&y<size)setF(x,y,d!==2&&d!==4);}};
+  finder(3,3);finder(size-4,3);finder(3,size-4);
+  const na=ver===1?0:Math.floor(ver/7)+2; let pos=[];
+  if(na){const step=Math.ceil((ver*4+4)/(na*2-2))*2; pos=[6]; for(let p=size-7;pos.length<na;p-=step)pos.splice(1,0,p);}
+  for(let i=0;i<na;i++)for(let j=0;j<na;j++){
+    if((i===0&&j===0)||(i===0&&j===na-1)||(i===na-1&&j===0))continue;
+    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)setF(pos[i]+dx,pos[j]+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1);
+  }
+  const drawFormat=mask=>{
+    const d=mask; let r=d; for(let i=0;i<10;i++)r=(r<<1)^((r>>>9)*0x537);
+    const b=((d<<10)|r)^0x5412, g=i=>((b>>>i)&1)!==0;
+    for(let i=0;i<=5;i++)setF(8,i,g(i));
+    setF(8,7,g(6));setF(8,8,g(7));setF(7,8,g(8));
+    for(let i=9;i<15;i++)setF(14-i,8,g(i));
+    for(let i=0;i<8;i++)setF(size-1-i,8,g(i));
+    for(let i=8;i<15;i++)setF(8,size-15+i,g(i));
+    setF(8,size-8,true);
+  };
+  drawFormat(0);
+  if(ver>=7){
+    let r=ver; for(let i=0;i<12;i++)r=(r<<1)^((r>>>11)*0x1F25);
+    const b=(ver<<12)|r;
+    for(let i=0;i<18;i++){const c=((b>>>i)&1)!==0,a=size-11+i%3,q=Math.floor(i/3);setF(a,q,c);setF(q,a,c);}
+  }
+  let k=0;
+  for(let right=size-1;right>=1;right-=2){
+    if(right===6)right=5;
+    for(let vert=0;vert<size;vert++)for(let j=0;j<2;j++){
+      const x=right-j, up=((right+1)&2)===0, y=up?size-1-vert:vert;
+      if(!fn[y][x]&&k<all.length*8){m[y][x]=((all[k>>>3]>>>(7-(k&7)))&1)!==0;k++;}
+    }
+  }
+  const maskFn=[(x,y)=>(x+y)%2===0,(x,y)=>y%2===0,(x,y)=>x%3===0,(x,y)=>(x+y)%3===0,
+    (x,y)=>(Math.floor(x/3)+Math.floor(y/2))%2===0,(x,y)=>x*y%2+x*y%3===0,
+    (x,y)=>(x*y%2+x*y%3)%2===0,(x,y)=>((x+y)%2+x*y%3)%2===0];
+  const apply=mask=>{for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(!fn[y][x]&&maskFn[mask](x,y))m[y][x]=!m[y][x];};
+  const penalty=()=>{
+    let p=0;
+    for(let t=0;t<2;t++)for(let a=0;a<size;a++){let run=1;
+      for(let b=1;b<size;b++){const c=t?m[b][a]:m[a][b],pr=t?m[b-1][a]:m[a][b-1];
+        if(c===pr){run++;if(run===5)p+=3;else if(run>5)p++;}else run=1;}}
+    for(let y=0;y<size-1;y++)for(let x=0;x<size-1;x++){const c=m[y][x];if(c===m[y][x+1]&&c===m[y+1][x]&&c===m[y+1][x+1])p+=3;}
+    let dark=0;for(const row of m)for(const c of row)if(c)dark++;
+    p+=(Math.ceil(Math.abs(dark*20-size*size*10)/(size*size))-1)*10;
+    return p;
+  };
+  let best=0,bestP=Infinity;
+  for(let mk=0;mk<8;mk++){apply(mk);drawFormat(mk);const p=penalty();if(p<bestP){bestP=p;best=mk;}apply(mk);}
+  if(forceMask!==undefined&&forceMask!==null)best=forceMask;
+  apply(best);drawFormat(best);
+  return {size, modules:m, version:ver, mask:best};
+}
+
+/* ---------- Étiquette (SVG) ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const QUIET = 2;
+
+function labelSVG(W,H,code,prenom,url,withSize){
+  const qr = makeQR(url), n = qr.size + QUIET*2;
+  const p = Math.max(1, H*0.05);
+  const s = Math.min(H - 2*p, W*0.58);
+  const sc = s/n;
+  let path = "";
+  for(let y=0;y<qr.size;y++)for(let x=0;x<qr.size;x++) if(qr.modules[y][x]) path += `M${x+QUIET} ${y+QUIET}h1v1h-1z`;
+  const tx = p + s + Math.max(1.2, W*0.02), rw = W - tx - p;
+  const items = [
+    {t:"ACEDEALS", hf:.19, wf:.70, style:'font-weight="900" font-style="italic"'},
+    {t:`Forfait ${NB_POSES} poses`, hf:.11, wf:.56, style:'font-weight="500"'},
+    {t:code, hf:.20, wf:.64, style:'font-weight="700" font-family="Consolas,Menlo,monospace"'},
+    ...(prenom ? [{t:prenom, hf:.14, wf:.58, style:'font-weight="600"'}] : []),
+    {t:"Scanne-moi", hf:.10, wf:.56, style:'font-weight="500"'}
+  ];
+  items.forEach(i => { i.fs = Math.min(H*i.hf, rw/(i.t.length*i.wf)); });
+  const total = items.reduce((a,i)=>a+i.fs*1.32,0);
+  let y = (H-total)/2, txt = "";
+  items.forEach(i => { y += i.fs*1.08; txt += `<text x="${tx.toFixed(2)}" y="${y.toFixed(2)}" font-size="${i.fs.toFixed(2)}" ${i.style}>${esc(i.t)}</text>`; y += i.fs*.24; });
+  const size = withSize ? ` width="${W}mm" height="${H}mm"` : "";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg"${size} viewBox="0 0 ${W} ${H}" font-family="Arial,Helvetica,sans-serif" fill="#000">`+
+    `<rect width="${W}" height="${H}" fill="#fff"/>`+
+    `<g transform="translate(${p} ${p}) scale(${sc})"><rect width="${n}" height="${n}" fill="#fff"/><path d="${path}" fill="#000" shape-rendering="crispEdges"/></g>`+
+    txt + `</svg>`;
+  return {svg, moduleMm: s/n, version: qr.version};
+}
+
+/* ---------- Interface ---------- */
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const ALPHA = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const PRESETS = [["30 × 15",30,15],["40 × 20",40,20],["50 × 25",50,25],["62 × 29",62,29],["70 × 35",70,35]];
+let knownCodes = null;
+
+function randomCode(){
+  const a = new Uint32Array(4); crypto.getRandomValues(a);
+  return "AD-" + Array.from(a, v => ALPHA[v % ALPHA.length]).join("");
+}
+function cleanCode(){ return $("code").value.trim().toUpperCase().replace(/\s+/g,""); }
+function linkFor(code){ return (params.get("base")||BASE_URL) + "?c=" + encodeURIComponent(code); }
+
+function build(){
+  const code = cleanCode(), prenom = $("prenom").value.trim();
+  const W = Math.min(120, Math.max(15, parseFloat($("w").value)||50));
+  const H = Math.min(100, Math.max(10, parseFloat($("h").value)||25));
+  const warn = $("codeWarn");
+  if(!/^[A-Z0-9-]{3,20}$/.test(code)){
+    warn.style.display = code ? "block" : "none";
+    warn.textContent = "Le code ne doit contenir que des lettres, des chiffres et des tirets.";
+    $("preview").innerHTML = '<div style="padding:40px 16px;color:#555;text-align:center;font-size:14px">Entre un code pour voir l\'étiquette.</div>';
+    $("link").textContent = ""; $("sheetRow").textContent = ""; return null;
+  }
+  warn.style.display = "none";
+  const url = linkFor(code);
+  const r = labelSVG(W,H,code,prenom,url,false);
+  $("preview").innerHTML = r.svg;
+  $("link").innerHTML = `Adresse du QR code : <a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`;
+  $("sheetRow").textContent = [code, prenom, NB_POSES, 0].join("\t");
+  const sw = $("sizeWarn");
+  if(r.moduleMm < 0.4){ sw.style.display="block"; sw.textContent = `Les carrés du QR font ${r.moduleMm.toFixed(2)} mm : c'est petit, certains téléphones auront du mal à le lire. Agrandis l'étiquette si possible.`; }
+  else sw.style.display = "none";
+  if(knownCodes){
+    const d = $("dup");
+    if(knownCodes.has(code)){ d.style.display="block"; d.style.color="#ffd166"; d.textContent = "Ce code existe déjà dans ton Sheets : choisis-en un autre pour un nouveau client."; }
+    else { d.style.display="block"; d.style.color="var(--ball)"; d.textContent = "Ce code est libre."; }
+  }
+  return {code,prenom,W,H,url};
+}
+
+function printLabels(){
+  const s = build(); if(!s) return;
+  const copies = Math.min(20, Math.max(1, parseInt($("copies").value,10)||1));
+  const one = labelSVG(s.W,s.H,s.code,s.prenom,s.url,true).svg;
+  $("printArea").innerHTML = Array(copies).fill(one).join("");
+  let st = $("pageStyle"); if(!st){ st = document.createElement("style"); st.id="pageStyle"; document.head.appendChild(st); }
+  st.textContent = `@page{size:${s.W}mm ${s.H}mm;margin:0}`;
+  window.print();
+}
+
+function downloadPNG(){
+  const s = build(); if(!s) return;
+  const pxPerMm = 300/25.4, cw = Math.round(s.W*pxPerMm), ch = Math.round(s.H*pxPerMm);
+  const svg = labelSVG(s.W,s.H,s.code,s.prenom,s.url,false).svg.replace("<svg ", `<svg width="${cw}" height="${ch}" `);
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+    const g = c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,cw,ch); g.drawImage(img,0,0,cw,ch);
+    c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `etiquette-${s.code}.png`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); },"image/png");
+  };
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
+async function loadKnown(){
+  try{
+    const res = await fetch(SHEET_CSV_URL + "&t=" + Date.now(), {cache:"no-store"});
+    if(!res.ok) return;
+    const lines = (await res.text()).split(/\r?\n/).slice(1);
+    knownCodes = new Set(lines.map(l => (l.split(/[,;]/)[0]||"").replace(/"/g,"").trim().toUpperCase()).filter(Boolean));
+    build();
+  }catch(e){}
+}
+
+function init(){
+  $("presets").innerHTML = PRESETS.map(([l,w,h]) => `<button class="ghost" type="button" data-w="${w}" data-h="${h}">${l} mm</button>`).join("");
+  $("presets").querySelectorAll("button").forEach(b => b.onclick = () => { $("w").value=b.dataset.w; $("h").value=b.dataset.h; save(); build(); });
+  try{ const sv = JSON.parse(localStorage.getItem("ad_label")||"null"); if(sv){ $("w").value=sv.w; $("h").value=sv.h; } }catch(e){}
+  if(params.get("w")) $("w").value = params.get("w");
+  if(params.get("h")) $("h").value = params.get("h");
+  if(params.get("code")) $("code").value = params.get("code");
+  if(params.get("prenom")) $("prenom").value = params.get("prenom");
+  ["code","prenom","w","h"].forEach(id => $(id).addEventListener("input", () => { if(id==="w"||id==="h") save(); build(); }));
+  $("rnd").onclick = () => { $("code").value = randomCode(); build(); };
+  $("print").onclick = printLabels;
+  $("png").onclick = downloadPNG;
+  $("copyRow").onclick = async () => {
+    const t = $("sheetRow").textContent; if(!t) return;
+    try{ await navigator.clipboard.writeText(t); $("copyRow").textContent = "Copié ✓"; }
+    catch(e){ const r=document.createRange(); r.selectNodeContents($("sheetRow")); const se=getSelection(); se.removeAllRanges(); se.addRange(r); $("copyRow").textContent = "Sélectionné : fais Ctrl+C"; }
+    setTimeout(()=>$("copyRow").textContent="Copier la ligne",2500);
+  };
+  build();
+  loadKnown();
+}
+function save(){ try{ localStorage.setItem("ad_label", JSON.stringify({w:$("w").value,h:$("h").value})); }catch(e){} }
+init();
+</script>
+</body>
+</html>
